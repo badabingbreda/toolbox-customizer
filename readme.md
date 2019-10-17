@@ -14,6 +14,7 @@ In your plugin add a callback-name to the 'init' hook.
      * Initialize the styles and creation of the css file(s) when needed
      */
     add_action( 'init' , 'myplugin_add_styles' );
+
     function myplugin_add_styles() {
 
 	// return early if toolbox_customizer_css doesn't exist
@@ -36,8 +37,8 @@ In your plugin add a callback-name to the 'init' hook.
 										)
 								);
 
-
 	   add_filter( 'toolbox_customizer_css_faithmade' , 'myplugin_my_variables' );
+
 	}
 
 
@@ -48,7 +49,6 @@ This assumes the code is added to the main plugin-file. Set the path_to_less_fil
 The first to last line of that code is another filter; It's name is always of format 'toolbox_customizer_css_{file_prefix}'. So next up, is the creation of the LESS-variables, which can be used to create the CSS-file.
 
     function myplugin_my_variables( $variables ) {
-
 
     	return array_merge( $variables ,
 

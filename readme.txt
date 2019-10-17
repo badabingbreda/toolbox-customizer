@@ -5,7 +5,7 @@ Contributors: BadabingBreda
 Tags: Plugins, Customizer, CSS
 Requires at least: 3.5
 Tested up to: 5.2.3
-Stable Tag: 1.0.0
+Stable Tag: 1.0.1
 
 Compile static CSS from customizer settings instead of inline
 
@@ -22,6 +22,10 @@ with colors and units.
 3. Click publish to commit the changes to a seperate CSS file that will be enqueued rather than created inline on each page-call
 
 == Changelog ==
+
+= 1.0.1 =
+
+* Small update to readme.md for improved readability
 
 = 1.0.0 =
 
