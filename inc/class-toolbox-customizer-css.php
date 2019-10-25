@@ -41,7 +41,7 @@ class toolbox_customizer_css {
 		// enqueue the final css only if the file exists, preventing a 404 error
 		if ( file_exists( $this->dir_settings( $this->directory )['cache_dir'] . '/' . $this->file_prefix . '.css' ) ) {
 
-			add_action( 'wp_enqueue_scripts' , array( $this , 'enqueue_final_css' ) , 20, 1 );
+			add_action( 'wp_enqueue_scripts' , array( $this , 'enqueue_final_css' ) , 1100, 1 );
 
 		}
 
@@ -66,7 +66,7 @@ class toolbox_customizer_css {
 		$this->write_temp_css();
 
 		// enqueue with priority 10 so that when adding the regular css with the same handler it won't overwrite it
-		add_action( 'wp_enqueue_scripts' , array( $this , 'enqueue_temp_css' ) , 10, 1 );
+		add_action( 'wp_enqueue_scripts' , array( $this , 'enqueue_temp_css' ) , 1000, 1 );
 
 	}
 

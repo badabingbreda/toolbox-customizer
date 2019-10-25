@@ -23,6 +23,10 @@ with colors and units.
 
 == Changelog ==
 
+- 1.1.0 =
+
+* Priority for loading .CSS and temp.CSS upped to 1000, to load after builder, theme and themer css
+
 = 1.0.1 =
 
 * Small update to readme.md for improved readability
