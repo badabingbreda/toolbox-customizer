@@ -23,7 +23,11 @@ with colors and units.
 
 == Changelog ==
 
-- 1.1.0 =
+= 1.2.0 =
+
+* Wrapped CSS compiling in try-catch to prevent error 500's from occuring. Compiler errors will be printed to the CSS
+
+= 1.1.0 =
 
 * Priority for loading .CSS and temp.CSS upped to 1000, to load after builder, theme and themer css
 

@@ -108,11 +108,18 @@ class toolbox_customizer_css {
 
 		$less_path = '/';
 
-		$parser->parseFile( $less_file , $less_path );
+		try {
 
-		$parser->ModifyVars( apply_filters(  'toolbox_customizer_css_' . $this->file_prefix , array() ) );
+			$parser->parseFile( $less_file , $less_path );
 
-		$css = $parser->getCss();
+			$parser->ModifyVars( apply_filters(  'toolbox_customizer_css_' . $this->file_prefix , array() ) );
+
+			$css = $parser->getCss();
+
+		} catch (Exception $e) {
+
+				$css = "\/* an error in the LESS file generated an error: ". $e->getMessage() ." *\/";
+		}
 
 		$this->create_dir( $this->directory );
 
