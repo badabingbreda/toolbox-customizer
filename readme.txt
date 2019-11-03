@@ -23,6 +23,11 @@ with colors and units.
 
 == Changelog ==
 
+= 1.3.0 =
+
+Added Twig-function 'toolbox_gtm()' for easier access to theme mods in Twig templates. This is a helper function that parses the get_theme_mod( $mod , (optional) $default ) function.
+Added Theme Mod String connector. Connect theme mods by entering their mod name, fallback return value and optional appended string.
+
 = 1.2.0 =
 
 * Wrapped CSS compiling in try-catch to prevent error 500's from occuring. Compiler errors will be printed to the CSS
