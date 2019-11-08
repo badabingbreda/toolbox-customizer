@@ -180,6 +180,14 @@ In the LESS file, you could then test for the variable being false (or rather, N
 LESS can be used to test for various types of variables. A variable for instance can be set to be `8px`, `5%`, `1.2em`, but also `black` or `#00ff00`. You can use test like `isnumber()`, `isunit()` or `iscolor()` to check if the value can be used. If everything was passed in as a string, you wouldn't be able to do that. But it also means that a value like `blue` might at times be the word `'blue'` and not the color.
 To be able to distinguish between the two, use 'tostring' as a setting. If not, it will be passed in as a keyword, which might result in unexpected behavior.
 
+### Silence alert popup on LESS compile errors
+
+When your LESS files generate an error, your generated CSS will fail. The generated errors are written to the CSS-file, but are hard to locate in the network-traffic-tree. To help you see that an error has occured an alert-box will popup on every request/change of the customizer. This can be pretty inconveniant so if needed you can remove the alert-box from appearing.
+All you need to do is create a constant called TOOLBOXCUSTOMIZER_SILENT in your functions.php:
+
+    <?php
+    define( 'TOOLBOXCUSTOMIZER_SILENT' , true );
+
 ### More on LESS
 If you want to learn more about using LESS, you can look here:
 

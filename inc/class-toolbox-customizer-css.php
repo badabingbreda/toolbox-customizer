@@ -97,6 +97,7 @@ class toolbox_customizer_css {
 	 */
 	public function parse_less_css( $filename ) {
 
+		$return_alert = false;
 
 		if ( !class_exists( 'Less_Parser') ) require_once( TOOLBOXCUSTOMIZER_DIR . 'vendor/autoload.php' );
 
@@ -119,11 +120,23 @@ class toolbox_customizer_css {
 		} catch (Exception $e) {
 
 				$css = "\/* an error in the LESS file generated an error: ". $e->getMessage() ." *\/";
+
+				// check for TOOLBOXCUSTOMIZER_SILENT CONSTANT, if found and set to true hide compile-error messages when they occur
+				// if not defined show
+				// if set to false also show
+				if ( !defined('TOOLBOXCUSTOMIZER_SILENT') ||  ( defined('TOOLBOXCUSTOMIZER_SILENT') && !TOOLBOXCUSTOMIZER_SILENT ) ) {
+
+					wp_enqueue_script( $this->file_prefix . '_error' , TOOLBOXCUSTOMIZER_URL . 'js/error_alert.js' , null, TOOLBOXCUSTOMIZER_VERSION , true );
+
+					wp_localize_script( $this->file_prefix . '_error', 'tbCustomizer' , array( 'compiled_css' => $css ) );
+
+				}
 		}
 
 		$this->create_dir( $this->directory );
 
 		$this->write_file( $this->directory , $filename , $css );
+
 
 	}
 

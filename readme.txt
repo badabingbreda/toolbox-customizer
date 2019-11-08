@@ -23,6 +23,11 @@ with colors and units.
 
 == Changelog ==
 
+= 1.4.0 =
+
+Added an alert-box that pops up when LESS files result in a compile-error. Downside is that you will receive a message everytime time you make a change.
+You can define a constant TOOLBOXCUSTOMIZER_SILENT, if found and set to true it will not show the error in the Customizer.
+
 = 1.3.0 =
 
 Added Twig-function 'toolbox_gtm()' for easier access to theme mods in Twig templates. This is a helper function that parses the get_theme_mod( $mod , (optional) $default ) function.
