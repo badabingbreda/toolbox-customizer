@@ -31,7 +31,7 @@ class toolbox_customizer_css {
 
 		if ( isset( $settings['path_to_less_file'] ) ) $this->path_to_less_file = $settings[ 'path_to_less_file' ];
 
-		$this->final_css_path = wp_upload_dir()['baseurl'] . '/' . $this->directory . '/' . $this->file_prefix . '.css';
+		$this->final_css_path = $this->dir_settings( $this->directory )['cache_dir'] . '/' . $this->file_prefix . '.css';
 
 		add_action( 'customize_preview_init' , array( $this , 'preview_css' ) , 20 );
 
@@ -245,12 +245,22 @@ class toolbox_customizer_css {
 	}
 
 	/**
-	 * Enqueue the final css
+	 * Enqueue the final css, use forced css-refresh when css file has been resaved
 	 * @return [type] [description]
 	 */
 	public function enqueue_final_css() {
 
-		wp_enqueue_style( $this->file_prefix , wp_upload_dir()['baseurl'] . '/' . $this->directory . '/' . $this->file_prefix . '.css' , null, $this->version, 'all' );
+		if ( $this->version == -1 ) {
+
+			$use_latest_version = filemtime( $this->final_css_path );
+
+			wp_enqueue_style( $this->file_prefix , wp_upload_dir()['baseurl'] . '/' . $this->directory . '/' . $this->file_prefix . '.css' , null, $use_latest_version , 'all' );
+
+		} else {
+
+			wp_enqueue_style( $this->file_prefix , wp_upload_dir()['baseurl'] . '/' . $this->directory . '/' . $this->file_prefix . '.css' , null, $this->version, 'all' );
+
+		}
 
 	}
 

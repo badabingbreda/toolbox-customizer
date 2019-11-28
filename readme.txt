@@ -23,6 +23,14 @@ with colors and units.
 
 == Changelog ==
 
+= 1.5.1 =
+
+Fix for version 1.5.0, lastchanged-check in css-file needs to be done on local path, not url
+
+= 1.5.0 =
+
+Added ability to force reload when css gets rebuilt. Use version = -1 as parameter in toolbox_customizer_css() class.
+
 = 1.4.0 =
 
 Added an alert-box that pops up when LESS files result in a compile-error. Downside is that you will receive a message everytime time you make a change.

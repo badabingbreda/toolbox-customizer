@@ -2,7 +2,7 @@
 
 namespace toolbox\customizer;
 /**
- * Callback taht add a twig filter to Twig
+ * Callback that add a twig filter to Twig
  * @param [type] $twig [description]
  */
 function add_twig_filters( $twig ) {
@@ -11,6 +11,10 @@ function add_twig_filters( $twig ) {
         $twig->addExtension( new \Twig_Extension_StringLoader() );
 
 
+        /**
+         * Get a theme_mod value for use inside a twig template
+         * @var [type]
+         */
 	    $twig->addFunction( new \Timber\Twig_Function( 'toolbox_gtm'  , function( $theme_mod , $default = null ) {
 
 	    	if ( $default ) return get_theme_mod( $theme_mod , $default );

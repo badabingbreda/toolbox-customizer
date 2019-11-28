@@ -29,7 +29,7 @@ In your plugin add a callback-name to the 'init' hook.
                                             'directory'             => 'faithmade_css' ,                    // directory that is used to store the compiled css files in
                                                                                                             // in /wp-content/uploads/{directory}
 
-                                            'version'               => '1.0.0',             // version for the css, probably the version of the plugin
+                                            'version'               => '1.0.0',             // version for the css, probably the version of the plugin, use -1 to always reload when   file gets updated
 
                                             'path_to_less_file'     => plugin_dir_path( __FILE__ ) ) . 'less/',     // probably good practice to set this one also.
                                                                                                             // local dir-path, NOT an url please
