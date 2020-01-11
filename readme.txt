@@ -23,6 +23,13 @@ with colors and units.
 
 == Changelog ==
 
+= 1.6.0 =
+
+Added 2 parameters to the filter that can be specified through toolbox_customizer_css::gtm();
+You can pass in $theme_mod and $unit as second and third parameter to process through a filter.
+Made the get_theme_mod(), 'value' and 'filter' to test individually so that 'filter' gets run if set, making it possible to change the behavior even if
+the theme_mod is set by the user.
+
 = 1.5.1 =
 
 Fix for version 1.5.0, lastchanged-check in css-file needs to be done on local path, not url

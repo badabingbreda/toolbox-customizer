@@ -1,3 +1,4 @@
+
 ## Toolbox Customizer
 
 Use LESS to create enqueued CSS (in your uploads folder) for your WP Customizer settings, rather than inline CSS.
@@ -174,6 +175,31 @@ In the LESS file, you could then test for the variable being false (or rather, N
         }
     }
 
+### using filters to get the value
+Sometimes a customizer value is set, but you want to treat it as if it wasn't. An example is a customizer with a slider, where you can set the value from 0-10. if somewhere the default behavior from the plugin is required, setting the customizer without being able to clear it would always return something, resulting in "a value". using a filter, you can force it to return false nonetheless.
+
+You can pass up to 3 parameters to the filter: `$value`, `$theme_mod` and `$unit`
+
+    'fm_button_border_width'        => toolbox_customizer_css::gtm( 'fm_button_border_width' ,array( 'filter'=> 'fm_false_on_zero' ) , 'px' ),
+
+Then, somewhere in your plugin or functions.php you need to add the filter (or filters):
+
+    // example of a
+    add_filter( 'fm_false_on_zero' , 'foo_false_on_zero' , 10 , 3 );
+
+    function foo_false_on_zero( $value , $theme_mod , $unit ) {
+        if ( get_theme_mod( $theme_mod ) == 0 ) return false; return $value;
+    }
+
+Or, use it with an anonymous function:
+
+    // alternatively add it as an anonymous function
+    add_filter( 'fm_false_on_zero' , function( $value , $theme_mod , $unit ) {
+
+        if ( get_theme_mod( $theme_mod ) == 0 ) return false;
+
+        return $value;
+    } , 10, 3 );
 
 ### Converting a returned value with the 'tostring' setting
 

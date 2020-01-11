@@ -35,9 +35,6 @@ class toolbox_customizer_css {
 
 		add_action( 'customize_preview_init' , array( $this , 'preview_css' ) , 20 );
 
-		// Let's add the CSS later so we can override the settings if we want
-		//add_action( 'wpbf_before_customizer_css', __NAMESPACE__ . '\faithmade_css', 20 );
-
 		// enqueue the final css only if the file exists, preventing a 404 error
 		if ( file_exists( $this->dir_settings( $this->directory )['cache_dir'] . '/' . $this->file_prefix . '.css' ) ) {
 
@@ -205,32 +202,39 @@ class toolbox_customizer_css {
 	 */
 	public static function gtm( $theme_mod , $default = array(), $unit = '' ) {
 
+
+		$theme_mod_value = false;
+
 		// if get_theme_mod returns a value or the value is 0 (would evaluate to false so need to do a strict check here)
-		if ( get_theme_mod( $theme_mod ) || !( get_theme_mod( $theme_mod ) === false )  ) {
+		if ( get_theme_mod( $theme_mod ) || ( get_theme_mod( $theme_mod ) !== false )  ) {
 
 			if ( isset( $default['tostring'] ) && $default['tostring'] ) {
 
-				return "\"". ( get_theme_mod( $theme_mod ) . $unit ) . "\"";
+				$theme_mod_value =  "\"". ( get_theme_mod( $theme_mod ) . $unit ) . "\"";
 
 			} else {
 
-				return ( get_theme_mod( $theme_mod ) . $unit );
+				$theme_mod_value = ( get_theme_mod( $theme_mod ) . $unit );
 
 			}
 		}
 
-		if ( isset( $default['value'] ) && $default[ 'value' ] ) return $default['value'] . $unit;
+		// if theme_mod_value is false and default value is set
+		if ( !$theme_mod_value && ( isset( $default['value'] ) && $default[ 'value' ] ) ) $theme_mod_value = $default['value'] . $unit;
 
-		// return a filtered value (fm_filter_color)
+		// pass it through the filter if set
 		if ( isset( $default['filter'] ) ) {
 
-			$filtered_value  = apply_filters( $default['filter'] , false );
-
-			if ( $filtered_value ) return $filtered_value . $unit;
+			$theme_mod_value  = apply_filters( $default['filter'] , $theme_mod_value , $theme_mod , $unit );
 
 		}
 
-		return false;
+		// if set apply filters that are named according to theme_mod and $this->file_prefix
+		//
+		$theme_mod_value = apply_filters( $theme_mod . '_' . $this->file_prefix , $value , $theme_mod , $unit );
+
+		// return the value
+		return $theme_mod_value;
 
 	}
 
