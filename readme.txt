@@ -23,6 +23,10 @@ with colors and units.
 
 == Changelog ==
 
+= 1.6.1 =
+
+Removed last apply_filter in toolbox_customizer_css::gtm(), which is called statically and not as an instance.
+
 = 1.6.0 =
 
 Added 2 parameters to the filter that can be specified through toolbox_customizer_css::gtm();

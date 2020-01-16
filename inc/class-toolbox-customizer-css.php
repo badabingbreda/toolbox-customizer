@@ -229,10 +229,6 @@ class toolbox_customizer_css {
 
 		}
 
-		// if set apply filters that are named according to theme_mod and $this->file_prefix
-		//
-		$theme_mod_value = apply_filters( $theme_mod . '_' . $this->file_prefix , $value , $theme_mod , $unit );
-
 		// return the value
 		return $theme_mod_value;
 
