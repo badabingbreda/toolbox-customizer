@@ -1,5 +1,4 @@
+// error alert for toolbox-customizer; translated variables added using script-localization
 ( function() {
-	alert( 'Whoops, the following error occured in the LESS files processed by the Toolbox-Customizer Plugin:\n\n' +
-			tbCustomizer.compiled_css +
-			'\n\nAdd a constant TOOLBOXCUSTOMIZER_SILENT to your functions.php to hide this alert.' );
+	alert( tbCustomizer.whoops + '\n\n' + tbCustomizer.compiled_css + '\n\n' + tbCustomizer.addconstant );
 })();

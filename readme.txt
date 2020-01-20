@@ -23,6 +23,15 @@ with colors and units.
 
 == Changelog ==
 
+= 1.6.3 =
+
+Added action 'toolbox_customizer_on_publish' on Customizer Publish so that callbacks can be run that clear asset cache.
+Added separate toolbox-customizer connector for photo fields. This tries to get media from ID, Array or URL.
+
+= 1.6.2 =
+
+Added Logic Rules for Beaver Builder, ability to render nodes if theme-mod isset, notset, equals, does_not_equal
+
 = 1.6.1 =
 
 Removed last apply_filter in toolbox_customizer_css::gtm(), which is called statically and not as an instance.

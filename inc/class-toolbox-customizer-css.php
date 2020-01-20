@@ -85,6 +85,8 @@ class toolbox_customizer_css {
 
 		$this->parse_less_css( $this->file_prefix . '.css' );
 
+		do_action( 'toolbox_customizer_on_publish', $this->file_prefix );
+
 	}
 
 	/**
@@ -125,7 +127,11 @@ class toolbox_customizer_css {
 
 					wp_enqueue_script( $this->file_prefix . '_error' , TOOLBOXCUSTOMIZER_URL . 'js/error_alert.js' , null, TOOLBOXCUSTOMIZER_VERSION , true );
 
-					wp_localize_script( $this->file_prefix . '_error', 'tbCustomizer' , array( 'compiled_css' => $css ) );
+					wp_localize_script( $this->file_prefix . '_error', 'tbCustomizer' , array(
+																								'compiled_css' 	=> $css,
+																								'whoops'		=> __( 'Whoops, the following error occured in the LESS files processed by the Toolbox-Customizer Plugin:', 'toolbox-customizer' ),
+																								'addconstant'	=> __( 'Add a constant TOOLBOXCUSTOMIZER_SILENT to your functions.php to hide this alert.', 'toolbox-customizer' ),
+																							) );
 
 				}
 		}

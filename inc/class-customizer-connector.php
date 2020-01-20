@@ -22,44 +22,75 @@ class bb_connector {
 			'label' => 'Toolbox'
 		) );
 
+		// return a Theme Mod String
 		\FLPageData::add_post_property( 'customizer_string', array(
-				'label'   => 'Theme Mod String',
+				'label'   => __( 'Theme Mod String' , 'toolbox-customizer' ),
 				'group'   => 'toolbox',
 				'type'    => array( 'color','string' ),
-				'getter'  => array( __CLASS__ , 'get_connection' ),
+				'getter'  => array( __CLASS__ , 'get_connection_string' ),
 			) );
 
+		// return a Theme Mod Photo
+		\FLPageData::add_post_property( 'customizer_photo', array(
+				'label'   => __( 'Theme Mod Photo' , 'toolbox-customizer' ),
+				'group'   => 'toolbox',
+				'type'    => array( 'photo' ),
+				'getter'  => array( __CLASS__ , 'get_connection_photo' ),
+			) );
 
 		\FLPageData::add_post_property_settings_fields( 'customizer_string', array(
 			// 'css'    => 'https://www.mysite.com/path-to-settings.css',
 			// 'js'     => 'https://www.mysite.com/path-to-settings.js',
 			'theme_mod' => array(
 			    'type'          => 'text',
-			    'label'         => __( 'Theme Mod Name', 'textdomain' ),
+			    'label'         => __( 'Theme Mod Name', 'toolbox-customizer' ),
 			    'default'       => '',
-			    'placeholder'   => __( 'Enter name of the Theme Mod Field', 'textdomain' ),
+			    'placeholder'   => __( 'Enter name of the Theme Mod Field', 'toolbox-customizer' ),
 			),
 			'default_return' => array(
 						    'type'          => 'text',
-						    'label'         => __( 'Default Return-value', 'textdomain' ),
+						    'label'         => __( 'Default Return-value', 'toolbox-customizer' ),
 						    'default'		=> '',
-						    'placeholder'   => __( 'Enter the default return-value', 'textdomain' ),
-						    'help'          => __( 'Value that gets returned when value hasn\'t been set in customizer.', 'textdomain' ),
+						    'placeholder'   => __( 'Enter the default return-value', 'toolbox-customizer' ),
+						    'help'          => __( 'Value that gets returned when value hasn\'t been set in customizer.', 'toolbox-customizer' ),
 			),
 			'append' => array(
 			    'type'          => 'text',
-			    'label'         => __( 'Append to value', 'textdomain' ),
+			    'label'         => __( 'Append to value', 'toolbox-customizer' ),
 			    'default'       => '',
-			    'placeholder'   => __( 'Append to value, example: px, em, vw', 'textdomain' ),
-			    'help'          => __( 'Optional string that gets appended directly after the returned value.', 'textdomain' ),
+			    'placeholder'   => __( 'Append to value, example: px, em, vw', 'toolbox-customizer' ),
+			    'help'          => __( 'Optional string that gets appended directly after the returned value.', 'toolbox-customizer' ),
 			),
 
 		) );
 
+		\FLPageData::add_post_property_settings_fields( 'customizer_photo', array(
+			// 'css'    => 'https://www.mysite.com/path-to-settings.css',
+			// 'js'     => 'https://www.mysite.com/path-to-settings.js',
+			'theme_mod' => array(
+			    'type'          => 'text',
+			    'label'         => __( 'Theme Mod Name', 'toolbox-customizer' ),
+			    'default'       => '',
+			    'placeholder'   => __( 'Enter name of the Theme Mod Field', 'toolbox-customizer' ),
+			),
+			'size' => array(
+				'type'        => 'select',
+				'label'       => __( 'Image Size', 'toolbox-customizer' ),
+				'default'	  => 'medium',
+				'options'     => apply_filters( 'toolbox-customizer/helpers/imagesizes', array() ),
+			),
+			'default_return' => array(
+						    'type'          => 'text',
+						    'label'         => __( 'Default Return-value', 'toolbox-customizer' ),
+						    'default'		=> '',
+						    'placeholder'   => __( 'Enter the default return-value', 'toolbox-customizer' ),
+						    'help'          => __( 'Value that gets returned when value hasn\'t been set in customizer.', 'toolbox-customizer' ),
+			),
+		) );
 
 	}
 
-	public static function get_connection( $settings , $property ) {
+	public static function get_connection_string( $settings , $property ) {
 
 		$theme_mod = get_theme_mod( $settings->theme_mod );
 
@@ -73,6 +104,34 @@ class bb_connector {
 		if ( is_string($theme_mod) && strpos( '#' , $theme_mod ) == 0 ) return substr( $theme_mod , 1 );
 
 		return $theme_mod . $settings->append;
+	}
+
+
+	public static function get_connection_photo( $settings , $property ) {
+
+		$theme_mod = get_theme_mod( $settings->theme_mod );
+
+		if ( !$theme_mod && $settings->default_return !== '' ) $theme_mod = $settings->default_return;
+
+		$theme_mod = $theme_mod?$theme_mod:apply_filters( 'tb_theme_mod_' . $settings->theme_mod, $theme_mod );
+
+		if ( gettype( $theme_mod ) == 'integer' ) {
+
+			return wp_get_attachment_image_url( $theme_mod , $settings->size );
+
+		} elseif ( gettype( $theme_mod ) == 'array' ) {
+
+			// try to match the theme_mod as an id (Kirki)
+			if ( isset( $theme_mod[ 'id'] ) && gettype( $theme_mod[ 'id' ] ) == 'integer' ) {
+
+				return wp_get_attachment_image_url( $theme_mod[ 'id' ] , $settings->size );
+
+			}
+
+		}
+
+		// returns string or boolean (false) if this point is reached
+		return $theme_mod;
 	}
 
 
