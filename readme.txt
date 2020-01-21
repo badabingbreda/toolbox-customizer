@@ -23,6 +23,10 @@ with colors and units.
 
 == Changelog ==
 
+= 1.6.4 =
+
+Added regex check for hex-color. We need colors to return without the #
+
 = 1.6.3 =
 
 Added action 'toolbox_customizer_on_publish' on Customizer Publish so that callbacks can be run that clear asset cache.

@@ -26,7 +26,7 @@ class bb_connector {
 		\FLPageData::add_post_property( 'customizer_string', array(
 				'label'   => __( 'Theme Mod String' , 'toolbox-customizer' ),
 				'group'   => 'toolbox',
-				'type'    => array( 'color','string' ),
+				'type'    => array( 'color', 'string', 'url' ),
 				'getter'  => array( __CLASS__ , 'get_connection_string' ),
 			) );
 
@@ -90,6 +90,12 @@ class bb_connector {
 
 	}
 
+	/**
+	 * Get the connection and return as a string
+	 * @param  [type] $settings [description]
+	 * @param  [type] $property [description]
+	 * @return [type]           [description]
+	 */
 	public static function get_connection_string( $settings , $property ) {
 
 		$theme_mod = get_theme_mod( $settings->theme_mod );
@@ -101,12 +107,23 @@ class bb_connector {
 		// // to speed this up we'll just asume that if the first character is a # that we are
 		// // dealing with a color
 		// //
-		if ( is_string($theme_mod) && strpos( '#' , $theme_mod ) == 0 ) return substr( $theme_mod , 1 );
+		if ( is_string( $theme_mod ) ) {
+
+			$checked_for_color = self::check_hex_color( $theme_mod );
+			// return the color if this seems to be hex color (we need to strip of the #)
+			if ( $checked_for_color !== $theme_mod ) return $checked_for_color;
+		}
 
 		return $theme_mod . $settings->append;
 	}
 
-
+	/**
+	 * Get the theme mod and try to turn it into a working URL in its right size
+	 * from an ID or array or just return the url
+	 * @param  [type] $settings [description]
+	 * @param  [type] $property [description]
+	 * @return [type]           [description]
+	 */
 	public static function get_connection_photo( $settings , $property ) {
 
 		$theme_mod = get_theme_mod( $settings->theme_mod );
@@ -134,7 +151,25 @@ class bb_connector {
 		return $theme_mod;
 	}
 
+	/**
+	 * Check if the input-value is a 3 or 6 digit hex color
+	 * @since  1.6.4
+	 * @param  [type] $value [description]
+	 * @return [type]        [description]
+	 */
+	public static function check_hex_color( $value ) {
 
+		$re = '/^#([a-fA-F0-9]{6}|[a-fA-F0-9]{3})$/m';
+
+		preg_match_all($re, $value, $matches, PREG_SET_ORDER, 0);
+		// if it's a hex color, return first match
+		if ( sizeof( $matches ) > 0 ) {
+
+			return $matches[1];
+		}
+		// just return the value
+		return $value;
+	}
 }
 
 bb_connector::init();
