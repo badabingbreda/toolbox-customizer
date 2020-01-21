@@ -159,13 +159,13 @@ class bb_connector {
 	 */
 	public static function check_hex_color( $value ) {
 
-		$re = '/^#([a-fA-F0-9]{6}|[a-fA-F0-9]{3})$/m';
+		$re = '/^#([a-fA-F0-9]{6}|[a-fA-F0-9]{3})$/';
 
-		preg_match_all($re, $value, $matches, PREG_SET_ORDER, 0);
+		preg_match($re, $value, $matches );
 		// if it's a hex color, return first match
 		if ( sizeof( $matches ) > 0 ) {
 
-			return $matches[1];
+			return $matches[ 1 ];
 		}
 		// just return the value
 		return $value;

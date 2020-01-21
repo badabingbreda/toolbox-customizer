@@ -23,6 +23,10 @@ with colors and units.
 
 == Changelog ==
 
+= 1.6.5 =
+
+Fixed mistake in regex that matches hex-color
+
 = 1.6.4 =
 
 Added regex check for hex-color. We need colors to return without the #
