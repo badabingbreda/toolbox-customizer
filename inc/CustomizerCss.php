@@ -1,6 +1,8 @@
 <?php
 
-class toolbox_customizer_css {
+namespace ToolboxCustomizer;
+
+class CustomizerCss {
 
 
 	private $file_prefix = '';
@@ -12,7 +14,10 @@ class toolbox_customizer_css {
 	private $version = '';
 
 	private $final_css_url = '';
+
 	private $final_css_path = '';
+
+	private $use_compiler = "less";
 
 	/**
 	 * Initialize the class
@@ -21,7 +26,11 @@ class toolbox_customizer_css {
 	 */
 	public function __construct( $settings = array() ) {
 
-		if ( !isset( $settings['file_prefix'] ) && !isset( $settings['directory'] ) && !isset( $settings['version'] ) ) return;
+		if ( 
+				!isset( $settings['file_prefix'] ) 
+				&& !isset( $settings['directory'] ) 
+				&& !isset( $settings['version'] ) 
+			) return;
 
 		$this->file_prefix = $settings[ 'file_prefix' ];
 
@@ -29,7 +38,26 @@ class toolbox_customizer_css {
 
 		$this->version = $settings[ 'version' ];
 
-		if ( isset( $settings['path_to_less_file'] ) ) $this->path_to_less_file = $settings[ 'path_to_less_file' ];
+		if ( isset( $settings['path_to_less_file'] ) ) {
+
+			$this->path_to_less_file = $settings[ 'path_to_less_file' ];
+
+		}
+
+		if (isset( $settings['use_compiler'] ) ) {
+
+			switch ($settings['use_compiler']) {
+				case "scss":
+
+					$this->use_compiler = "scss";
+
+					break;
+				default:
+				case "less":
+					// do nothing, less is the default
+					break;
+			}
+		}
 
 		$this->final_css_path = $this->dir_settings( $this->directory )['cache_dir'] . '/' . $this->file_prefix . '.css';
 
@@ -63,7 +91,7 @@ class toolbox_customizer_css {
 		$this->write_temp_css();
 
 		// enqueue with priority 10 so that when adding the regular css with the same handler it won't overwrite it
-		add_action( 'wp_enqueue_scripts' , array( $this , 'enqueue_temp_css' ) , 1000, 1 );
+		add_action( 'wp_enqueue_scripts' , array( $this , 'enqueue_temp_css' ), 1000, 1 );
 
 	}
 
@@ -73,7 +101,15 @@ class toolbox_customizer_css {
 	 */
 	public function write_temp_css() {
 
-		$this->parse_less_css( $this->file_prefix . '_temp.css' );
+		if ( $this->use_compiler == 'scss' ) {
+
+			$this->parse_scss_css( $this->file_prefix . '_temp.css' , 'expanded' );
+
+		} else {
+
+			$this->parse_less_css( $this->file_prefix . '_temp.css' );
+
+		}
 
 	}
 
@@ -83,11 +119,78 @@ class toolbox_customizer_css {
 	 */
 	public function write_css() {
 
-		$this->parse_less_css( $this->file_prefix . '.css' );
+		if ( $this->use_compiler == 'scss' ) {
 
+			$this->parse_scss_css( $this->file_prefix . '.css' , 'compressed' );
+
+		} else {
+			$this->parse_less_css( $this->file_prefix . '.css' );
+
+		}
 		do_action( 'toolbox_customizer_on_publish', $this->file_prefix );
 
 	}
+
+	/**
+	 * Parse the plugins less file with the variables that are set in the get_variables() callback
+	 * @param  [type] $filename [description]
+	 * @return [type]           [description]
+	 */
+	public function parse_scss_css( $filename , $output ) {
+
+		$return_alert = false;
+
+		if ( !class_exists( 'Compiler') ) require_once( TOOLBOXCUSTOMIZER_DIR . 'vendor/autoload.php' );
+
+		$css = '';
+
+		$parser = new \ScssPhp\ScssPhp\Compiler();
+		
+
+		$parser->setOutputStyle( $output );
+
+		$scss_file = ( $this->path_to_less_file?$this->path_to_less_file:TOOLBOXCUSTOMIZER_DIR . 'scss/' ) . $this->file_prefix . '.scss';
+
+		$less_path = '/';
+
+		try {
+
+			//$parser->parseFile( $less_file , $less_path );
+			$parser->setImportPaths( $this->path_to_less_file ? $this->path_to_less_file : TOOLBOXCUSTOMIZER_DIR . 'scss/' );
+
+			//$parser->setVariables( apply_filters(  'toolbox_customizer_css_' . $this->file_prefix , array() ) );
+
+			$stylesheet = $this->values_to_stylesheet( apply_filters(  'toolbox_customizer_css_' . $this->file_prefix , array() ) );
+
+			$css = $parser->compile( $stylesheet . '@import "'.$this->file_prefix.'.scss"' );
+
+		} catch (\Exception $e) {
+
+				$css = "\/* an error in the SCSS file generated an error: ". $e->getMessage() ." *\/";
+
+				// check for TOOLBOXCUSTOMIZER_SILENT CONSTANT, if found and set to true hide compile-error messages when they occur
+				// if not defined show
+				// if set to false also show
+				if ( !defined('TOOLBOXCUSTOMIZER_SILENT') ||  ( defined('TOOLBOXCUSTOMIZER_SILENT') && !TOOLBOXCUSTOMIZER_SILENT ) ) {
+
+					wp_enqueue_script( $this->file_prefix . '_error' , TOOLBOXCUSTOMIZER_URL . 'js/error_alert.js' , null, TOOLBOXCUSTOMIZER_VERSION , true );
+
+					wp_localize_script( $this->file_prefix . '_error', 'tbCustomizer' , array(
+																								'compiled_css' 	=> $css,
+																								'whoops'		=> __( 'Whoops, the following error occured in the SCSS files processed by the Toolbox-Customizer Plugin:', 'toolbox-customizer' ),
+																								'addconstant'	=> __( 'Add a constant TOOLBOXCUSTOMIZER_SILENT to your functions.php to hide this alert.', 'toolbox-customizer' ),
+																							) );
+
+				}
+		}
+
+		$this->create_dir( $this->directory );
+
+		$this->write_file( $this->directory , $filename , $css );
+
+
+	}
+
 
 	/**
 	 * Parse the plugins less file with the variables that are set in the get_variables() callback
@@ -160,6 +263,28 @@ class toolbox_customizer_css {
 	    }
 
 	}
+	
+	/**
+	 * values_to_stylesheet
+	 *
+	 * Returns an array of named variables as a stylesheet
+	 * 
+	 * @param  mixed $variables
+	 * @return void
+	 */
+	private function values_to_stylesheet( $variables ) {
+		
+		$template = "$%s: %s;\n";
+
+		$output = '';
+
+		foreach ($variables as $var_name=>$value) {
+			$output .= sprintf( $template , $var_name , $value );
+		}
+
+		return $output;
+	}
+
 
 	/**
 	 * Write a file with the stream
@@ -206,7 +331,7 @@ class toolbox_customizer_css {
 	 * @param  string $unit      [description]
 	 * @return [type]            [description]
 	 */
-	public static function gtm( $theme_mod , $default = array(), $unit = '' ) {
+	public static function gtm( $theme_mod , $default = array(), $unit = null ) {
 
 
 		$theme_mod_value = false;
@@ -220,7 +345,14 @@ class toolbox_customizer_css {
 
 			} else {
 
-				$theme_mod_value = ( get_theme_mod( $theme_mod ) . $unit );
+				if ( $unit ) {
+
+					$theme_mod_value = ( get_theme_mod( $theme_mod ) . $unit );
+				} else {
+
+					$theme_mod_value = ( get_theme_mod( $theme_mod ) );
+
+				}
 
 			}
 		}
@@ -239,6 +371,14 @@ class toolbox_customizer_css {
 		return $theme_mod_value;
 
 	}
+
+	// public static function gtm_param( $theme_mod , $key , $default) {
+
+	// 	$mod_val = get_theme_mod( $theme_mod , false );
+
+	// 	if ( $mod_val === false || !isset($mod_val[$key]) || $mod_val[$key] === '' ) return $default;
+	// 	return $mod_val[$key];
+	// }
 
 	/**
 	 * Enqueue the temp css

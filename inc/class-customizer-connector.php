@@ -1,6 +1,6 @@
 <?php
 
-namespace toolbox\customizer;
+namespace ToolboxCustomizer;
 
 class bb_connector {
 
