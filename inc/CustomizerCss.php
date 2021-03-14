@@ -372,13 +372,13 @@ class CustomizerCss {
 
 	}
 
-	// public static function gtm_param( $theme_mod , $key , $default) {
+	public static function gtm_param( $theme_mod , $key , $default) {
 
-	// 	$mod_val = get_theme_mod( $theme_mod , false );
+		$mod_val = get_theme_mod( $theme_mod , false );
 
-	// 	if ( $mod_val === false || !isset($mod_val[$key]) || $mod_val[$key] === '' ) return $default;
-	// 	return $mod_val[$key];
-	// }
+		if ( $mod_val === false || !isset($mod_val[$key]) || $mod_val[$key] === '' ) return $default;
+		return $mod_val[$key];
+	}
 
 	/**
 	 * Enqueue the temp css
