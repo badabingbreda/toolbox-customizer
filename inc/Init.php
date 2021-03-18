@@ -2,10 +2,14 @@
 
 namespace ToolboxCustomizer;
 use ToolboxCustomizer\CustomizerCss;
+use ToolboxCustomizer\Beaverbuilder;
 
 class Init {
 
     public function __construct() {
+
+        // 
+        new Beaverbuilder();
 
         /**
          * Add Twig Filters used in this plugin

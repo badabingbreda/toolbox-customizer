@@ -59,19 +59,30 @@ class CustomizerCss {
 			}
 		}
 
-		$this->final_css_path = $this->dir_settings( $this->directory )['cache_dir'] . '/' . $this->file_prefix . '.css';
+		$this->final_css_path = $this->get_final_css_path();
 
 		add_action( 'customize_preview_init' , array( $this , 'preview_css' ) , 20 );
 
-		// enqueue the final css only if the file exists, preventing a 404 error
-		if ( file_exists( $this->dir_settings( $this->directory )['cache_dir'] . '/' . $this->file_prefix . '.css' ) ) {
-
-			add_action( 'wp_enqueue_scripts' , array( $this , 'enqueue_final_css' ) , 1100, 1 );
-
-		}
-
 		add_action( 'customize_save_after' , array( $this , 'write_css' )  );
 
+		// Check if the CSS exists
+		// if not, create it
+		if ( !file_exists( $this->final_css_path ) ) {
+
+			// compile the CSS neede for this plugin
+			add_action( 'init' , array( $this , 'write_css' ) , 1100 );
+
+		}
+		// enqueue the css
+		add_action( 'wp_enqueue_scripts' , array( $this , 'enqueue_final_css' ) , 1100, 1 );
+
+
+
+	}
+
+
+	private function get_final_css_path() {
+		return $this->dir_settings( $this->directory )['cache_dir'] . '/' . $this->file_prefix . '.css';
 	}
 
 	/**
@@ -103,11 +114,11 @@ class CustomizerCss {
 
 		if ( $this->use_compiler == 'scss' ) {
 
-			$this->parse_scss_css( $this->file_prefix . '_temp.css' , 'expanded' );
+			$this->parse_scss_css( $this->file_prefix . '_temp.css' , 'expanded', true );
 
 		} else {
 
-			$this->parse_less_css( $this->file_prefix . '_temp.css' );
+			$this->parse_less_css( $this->file_prefix . '_temp.css' , 'expanded', true );
 
 		}
 
@@ -121,32 +132,64 @@ class CustomizerCss {
 
 		if ( $this->use_compiler == 'scss' ) {
 
-			$this->parse_scss_css( $this->file_prefix . '.css' , 'compressed' );
+			$this->parse_scss_css( $this->file_prefix . '.css' , 'compressed', false );
 
 		} else {
-			$this->parse_less_css( $this->file_prefix . '.css' );
+			$this->parse_less_css( $this->file_prefix . '.css' , 'compressed' , false );
 
 		}
 		do_action( 'toolbox_customizer_on_publish', $this->file_prefix );
 
 	}
+	
+	/**
+	 * use_cache
+	 * 
+	 * Return if saved-cache and settings are identical
+	 *
+	 * @return void
+	 */
+	public function use_cache() {
+
+		// get the settings that we need
+		$settings = apply_filters(  'toolbox_customizer_css_' . $this->file_prefix , array() );
+		
+		// build the cache file path
+		$cache_path = $this->dir_settings( $this->directory )['cache_dir'] . '/' . $this->file_prefix . '.cache';
+
+		// check if cache already exists
+		if ( \file_exists( $cache_path ) ) {
+
+			$cache = \file_get_contents( $cache_path );
+			
+			$cache_data = \json_decode( $cache , true );
+			// return if the data is identical. Of so, we don't need to recompile, return false
+			return ( $this->arrayRecursiveDiff( $settings , $cache_data ) == [] );
+
+		}
+		// don't use cache
+		return false;
+	}
+
 
 	/**
 	 * Parse the plugins less file with the variables that are set in the get_variables() callback
 	 * @param  [type] $filename [description]
 	 * @return [type]           [description]
 	 */
-	public function parse_scss_css( $filename , $output ) {
+	public function parse_scss_css( $filename , $output , $use_cache = false ) {
+
+
+		if ( $use_cache && $this->use_cache()) return;
 
 		$return_alert = false;
 
-		if ( !class_exists( 'Compiler') ) require_once( TOOLBOXCUSTOMIZER_DIR . 'vendor/autoload.php' );
+		if ( !class_exists( '\ScssPhp\ScssPhp\Compiler') ) require_once( TOOLBOXCUSTOMIZER_DIR . 'vendor/autoload.php' );
 
 		$css = '';
 
 		$parser = new \ScssPhp\ScssPhp\Compiler();
 		
-
 		$parser->setOutputStyle( $output );
 
 		$scss_file = ( $this->path_to_less_file?$this->path_to_less_file:TOOLBOXCUSTOMIZER_DIR . 'scss/' ) . $this->file_prefix . '.scss';
@@ -158,11 +201,11 @@ class CustomizerCss {
 			//$parser->parseFile( $less_file , $less_path );
 			$parser->setImportPaths( $this->path_to_less_file ? $this->path_to_less_file : TOOLBOXCUSTOMIZER_DIR . 'scss/' );
 
-			//$parser->setVariables( apply_filters(  'toolbox_customizer_css_' . $this->file_prefix , array() ) );
-
-			$stylesheet = $this->values_to_stylesheet( apply_filters(  'toolbox_customizer_css_' . $this->file_prefix , array() ) );
-
-			$css = $parser->compile( $stylesheet . '@import "'.$this->file_prefix.'.scss"' );
+			// create a stylesheet for the constants because passing variables did not work correctly, because of returned keywords instead of colors
+			$stylesheet_variables = $this->variables_to_stylesheet( apply_filters(  'toolbox_customizer_css_' . $this->file_prefix , array() ) );
+			
+			// compile the css by adding the variables before the import
+			$css = $parser->compile( $stylesheet_variables . '@import "'.$this->file_prefix.'.scss"' );
 
 		} catch (\Exception $e) {
 
@@ -188,6 +231,8 @@ class CustomizerCss {
 
 		$this->write_file( $this->directory , $filename , $css );
 
+		$this->write_file( $this->directory , $this->file_prefix . '.cache' , json_encode( apply_filters(  'toolbox_customizer_css_' . $this->file_prefix , array() ) ) );
+
 
 	}
 
@@ -197,7 +242,11 @@ class CustomizerCss {
 	 * @param  [type] $filename [description]
 	 * @return [type]           [description]
 	 */
-	public function parse_less_css( $filename ) {
+	public function parse_less_css( $filename , $output = 'expanded', $use_cache = false ) {
+
+		$options = array( 'compress' => ( $output == 'compressed' ) );
+
+		if ( $use_cache && $this->use_cache()) return;
 
 		$return_alert = false;
 
@@ -205,7 +254,7 @@ class CustomizerCss {
 
 		$css = '';
 
-		$parser = new \Less_Parser();
+		$parser = new \Less_Parser( $options );
 
 		$less_file = ( $this->path_to_less_file?$this->path_to_less_file:TOOLBOXCUSTOMIZER_DIR . 'less/' ) . $this->file_prefix . '.less';
 
@@ -213,9 +262,17 @@ class CustomizerCss {
 
 		try {
 
+
+			// create a stylesheet for the constants because passing variables did not work correctly, because of returned keywords instead of colors
+			$stylesheet_variables = $this->variables_to_stylesheet( apply_filters(  'toolbox_customizer_css_' . $this->file_prefix , array() ) , '@' );
+
+			//$parser->SetImportDirs( array( [ $this->path_to_less_file => '' ] ) );
+
+			$parser->parse( $stylesheet_variables );
+
 			$parser->parseFile( $less_file , $less_path );
 
-			$parser->ModifyVars( apply_filters(  'toolbox_customizer_css_' . $this->file_prefix , array() ) );
+			//$parser->ModifyVars( apply_filters(  'toolbox_customizer_css_' . $this->file_prefix , array() ) );
 
 			$css = $parser->getCss();
 
@@ -243,6 +300,7 @@ class CustomizerCss {
 
 		$this->write_file( $this->directory , $filename , $css );
 
+		$this->write_file( $this->directory , $this->file_prefix . '.cache' , json_encode( apply_filters(  'toolbox_customizer_css_' . $this->file_prefix , array() ) ) );
 
 	}
 
@@ -265,21 +323,21 @@ class CustomizerCss {
 	}
 	
 	/**
-	 * values_to_stylesheet
+	 * variables_to_stylesheet
 	 *
 	 * Returns an array of named variables as a stylesheet
 	 * 
 	 * @param  mixed $variables
 	 * @return void
 	 */
-	private function values_to_stylesheet( $variables ) {
+	private function variables_to_stylesheet( $variables , $prefix = '$' ) {
 		
-		$template = "$%s: %s;\n";
+		$template = "%s%s: %s;\n";
 
 		$output = '';
 
 		foreach ($variables as $var_name=>$value) {
-			$output .= sprintf( $template , $var_name , $value );
+			$output .= sprintf( $template , $prefix , $var_name , $value );
 		}
 
 		return $output;
@@ -371,7 +429,15 @@ class CustomizerCss {
 		return $theme_mod_value;
 
 	}
-
+	
+	/**
+	 * gtm_param
+	 *
+	 * @param  mixed $theme_mod
+	 * @param  mixed $key
+	 * @param  mixed $default
+	 * @return void
+	 */
 	public static function gtm_param( $theme_mod , $key , $default) {
 
 		$mod_val = get_theme_mod( $theme_mod , false );
@@ -409,6 +475,37 @@ class CustomizerCss {
 		}
 
 	}
+	
+	/**
+	 * arrayRecursiveDiff
+	 * 
+	 * code courtesy of php.net
+	 * https://www.php.net/manual/en/function.array-diff.php#91756
+	 *
+	 * @param  mixed $aArray1
+	 * @param  mixed $aArray2
+	 * @return void
+	 */
+	public function arrayRecursiveDiff($aArray1, $aArray2) {
+		$aReturn = array();
+	  
+		foreach ($aArray1 as $mKey => $mValue) {
+			if (array_key_exists($mKey, $aArray2)) {
+				if (is_array($mValue)) {
+					$aRecursiveDiff = arrayRecursiveDiff($mValue, $aArray2[$mKey]);
+					if (count($aRecursiveDiff)) { $aReturn[$mKey] = $aRecursiveDiff; }
+				} else {
+					if ($mValue != $aArray2[$mKey]) {
+						$aReturn[$mKey] = $mValue;
+					}
+				}
+			} else {
+				$aReturn[$mKey] = $mValue;
+			}
+		}
+	  
+		return $aReturn;
+	}	
 
 }
 
