@@ -61,7 +61,7 @@ class CustomizerCss {
 
 		$this->final_css_path = $this->get_final_css_path();
 
-		add_action( 'customize_preview_init' , array( $this , 'preview_css' ) , 20 );
+		add_action( 'customize_preview_init' , array( $this , 'preview_css' ) , 1100 );
 
 		add_action( 'customize_save_after' , array( $this , 'write_css' )  );
 
