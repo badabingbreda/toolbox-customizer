@@ -75,6 +75,29 @@ The first to last line of that code is another filter; It's name is always of fo
 
 This creates a single variable @fm_button_color, which can be used in the less file to do stuff. As you might expect, this variable expects to return a value like `#ff000`, `#00ff00`, `rgb(255,0,0)`, `rgba(255,0,0,.2)` or `purple`. But if there is no value, it will return a static value `false`.
 
+## The SCSS file
+
+You can use `scale-color( $color-value , $lightness: 30% );` to create lighter colors based on parameters.
+
+    div {
+        &.dbraflex {
+            background-color: $dbraflex_main_color;
+            &.lighten5 {
+                background-color: scale-color( $dbraflex_main_color, $lightness: 5%);
+            }
+            &.lighten10 {
+                background-color: scale-color( $dbraflex_main_color, $lightness: 10%);
+            }
+            &.lighten15 {
+                background-color: scale-color( $dbraflex_main_color, $lightness: 15%);
+            }
+            &.lighten20 {
+                background-color: scale-color( $dbraflex_main_color, $lightness: 20%);
+            }
+        }
+    }    
+
+
 ### The LESS file
 Now all that remains is to edit the less-file located in the plugin's 'less/' directory.
 Edit the file called 'faithmade.less' (or whatever you set to use as a {file_prefix}.less):
