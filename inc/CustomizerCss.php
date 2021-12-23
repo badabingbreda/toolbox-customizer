@@ -19,6 +19,8 @@ class CustomizerCss {
 
 	private $use_compiler = "less";
 
+	private $debug = false;		// output compiled variables.scss to the export path
+
 	/**
 	 * Initialize the class
 	 * @param  array $settings settings for the customizer_css
@@ -37,6 +39,11 @@ class CustomizerCss {
 		$this->directory = $settings[ 'directory' ];
 
 		$this->version = $settings[ 'version' ];
+
+		if ( isset( $settings[ 'debug' ] ) ) {
+
+			$this->debug = $settings[ 'debug' ];
+		}
 
 		if ( isset( $settings['path_to_less_file'] ) ) {
 
@@ -79,7 +86,6 @@ class CustomizerCss {
 
 
 	}
-
 
 	private function get_final_css_path() {
 		return $this->dir_settings( $this->directory )['cache_dir'] . '/' . $this->file_prefix . '.css';
@@ -130,12 +136,14 @@ class CustomizerCss {
 	 */
 	public function write_css() {
 
+		if ( ! \is_customize_preview() ) return;
+
 		if ( $this->use_compiler == 'scss' ) {
 
-			$this->parse_scss_css( $this->file_prefix . '.css' , 'compressed', false );
+			$this->parse_scss_css( $this->file_prefix . '.css' , $this->debug ? 'expanded' : 'compressed' , false );
 
 		} else {
-			$this->parse_less_css( $this->file_prefix . '.css' , 'compressed' , false );
+			$this->parse_less_css( $this->file_prefix . '.css' , $this->debug ? 'expanded' : 'compressed' , false );
 
 		}
 		do_action( 'toolbox_customizer_on_publish', $this->file_prefix );
@@ -180,7 +188,7 @@ class CustomizerCss {
 	public function parse_scss_css( $filename , $output , $use_cache = false ) {
 
 
-		if ( $use_cache && $this->use_cache()) return;
+		if ( $use_cache && $this->use_cache() ) return;
 
 		$return_alert = false;
 
@@ -192,7 +200,7 @@ class CustomizerCss {
 		
 		$parser->setOutputStyle( $output );
 
-		$scss_file = ( $this->path_to_less_file?$this->path_to_less_file:TOOLBOXCUSTOMIZER_DIR . 'scss/' ) . $this->file_prefix . '.scss';
+		$scss_file = ( $this->path_to_less_file ? $this->path_to_less_file : TOOLBOXCUSTOMIZER_DIR . 'scss/' ) . $this->file_prefix . '.scss';
 
 		$less_path = '/';
 
@@ -203,6 +211,8 @@ class CustomizerCss {
 
 			// create a stylesheet for the constants because passing variables did not work correctly, because of returned keywords instead of colors
 			$stylesheet_variables = $this->variables_to_stylesheet( apply_filters(  'toolbox_customizer_css_' . $this->file_prefix , array() ) );
+
+			if ( $this->debug ) $this->write_file( $this->directory , 'variables.scss' , $stylesheet_variables );
 			
 			// compile the css by adding the variables before the import
 			$css = $parser->compile( $stylesheet_variables . '@import "'.$this->file_prefix.'.scss"' );
@@ -246,7 +256,7 @@ class CustomizerCss {
 
 		$options = array( 'compress' => ( $output == 'compressed' ) );
 
-		if ( $use_cache && $this->use_cache()) return;
+		if ( $use_cache && $this->use_cache() ) return;
 
 		$return_alert = false;
 
@@ -256,7 +266,7 @@ class CustomizerCss {
 
 		$parser = new \Less_Parser( $options );
 
-		$less_file = ( $this->path_to_less_file?$this->path_to_less_file:TOOLBOXCUSTOMIZER_DIR . 'less/' ) . $this->file_prefix . '.less';
+		$less_file = ( $this->path_to_less_file ? $this->path_to_less_file : TOOLBOXCUSTOMIZER_DIR . 'less/' ) . $this->file_prefix . '.less';
 
 		$less_path = '/';
 
