@@ -187,7 +187,7 @@ class Beaverbuilder {
 
 		$theme_mod = $theme_mod?$theme_mod:apply_filters( 'tb_theme_mod_' . $settings->theme_mod, $theme_mod );
 
-		if ( gettype( $theme_mod ) == 'integer' ) {
+		if ( gettype( $theme_mod ) == 'integer' || (integer )$theme_mod == $theme_mod ) {
 
 			return wp_get_attachment_image_url( $theme_mod , $settings->size );
 
