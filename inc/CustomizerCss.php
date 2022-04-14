@@ -19,6 +19,8 @@ class CustomizerCss {
 
 	private $use_compiler = "less";
 
+	private $priority = 1100;
+
 	private $debug = false;		// output compiled variables.scss to the export path
 
 	/**
@@ -51,6 +53,12 @@ class CustomizerCss {
 
 		}
 
+		if ( isset( $settings[ 'priority' ] ) ) {
+
+			$this->priority = $settings[ 'priority' ];
+
+		}
+
 		if (isset( $settings['use_compiler'] ) ) {
 
 			switch ($settings['use_compiler']) {
@@ -70,18 +78,18 @@ class CustomizerCss {
 
 		add_action( 'customize_preview_init' , array( $this , 'preview_css' ) , 1100 );
 
-		add_action( 'customize_save_after' , array( $this , 'write_css' )  );
+		add_action( 'customize_save_after' , array( $this , 'write_css' ) , 1100  );
 
 		// Check if the CSS exists
 		// if not, create it
 		if ( !file_exists( $this->final_css_path ) ) {
 
-			// compile the CSS neede for this plugin
-			add_action( 'init' , array( $this , 'write_css' ) , 1100 );
+			// compile the CSS needed for this plugin
+			add_action( 'init' , array( $this , 'write_css' ) );
 
 		}
 		// enqueue the css
-		add_action( 'wp_enqueue_scripts' , array( $this , 'enqueue_final_css' ) , 1100, 1 );
+		add_action( 'wp_enqueue_scripts' , array( $this , 'enqueue_final_css' ) , $this->priority , 1 );
 
 
 
@@ -107,7 +115,7 @@ class CustomizerCss {
 
 		$this->write_temp_css();
 
-		// enqueue with priority 10 so that when adding the regular css with the same handler it won't overwrite it
+		// enqueue with priority 1000 so that when adding the regular css with the same handler it won't overwrite it
 		add_action( 'wp_enqueue_scripts' , array( $this , 'enqueue_temp_css' ), 1000, 1 );
 
 	}
