@@ -1,21 +1,76 @@
 <?php
+/**
+ * ToolboxCustomizer Beaver Builder Connector and Logic Rules
+ *
+ * @package packagename
+ * @since 1.0.0
+ * @author BadabingBreda
+ * @link http://www.badabing.nl
+ * @license GNU General Public License 2.0+
+ */
 
-namespace toolbox\customizer;
 
-class bb_connector {
+namespace ToolboxCustomizer;
 
+class Beaverbuilder {
 
 
 	public static $mods = array(
 								'string'	=> array(),
 							);
 
-	public static function init() {
+	public function __construct() {
 
 		add_action( 'fl_page_data_add_properties' , __CLASS__ . "::add_connector" , 10 , 1 );
 
+		// conditional logic rules scripts
+		add_action( 'bb_logic_init', __CLASS__ . '::require_rules' );
+		add_action( 'bb_logic_enqueue_scripts', __CLASS__ . '::enqueue_script' );
 	}
 
+	
+	/**
+	 * require_rules
+	 *
+	 * @return void
+	 */
+	public static function require_rules() {
+		require_once TOOLBOXCUSTOMIZER_DIR . 'rules/tbcustomizer/classes/class-bb-logic-rules-tb-customizer.php';
+	}
+
+	public static function enqueue_script() {
+
+		wp_enqueue_script(
+			'bb-logic-rules-tb-customizer',
+			TOOLBOXCUSTOMIZER_URL . 'rules/tbcustomizer/build/index.js',
+			array( 'bb-logic-core' ),
+			TOOLBOXCUSTOMIZER_VERSION,
+			true
+		);
+
+		/**
+		 * Add translation for Beavers Conditional Logic Modal
+		 * @return [type] [description]
+		 */
+		wp_localize_script(
+		  'bb-logic-rules-tb-customizer',
+		  'tb_customizer_js_translations',
+		  [
+		    '__' => [
+		    	'tbcustomizer' => __( 'Toolbox Customizer' , 'toolbox-customizer' ),
+
+			]
+		  ]
+		);
+
+
+	}
+	
+	/**
+	 * add_connector
+	 *
+	 * @return void
+	 */
 	public static function add_connector() {
 
 		\FLPageData::add_group( 'toolbox', array(
@@ -132,7 +187,7 @@ class bb_connector {
 
 		$theme_mod = $theme_mod?$theme_mod:apply_filters( 'tb_theme_mod_' . $settings->theme_mod, $theme_mod );
 
-		if ( gettype( $theme_mod ) == 'integer' ) {
+		if ( gettype( $theme_mod ) == 'integer' || (integer )$theme_mod == $theme_mod ) {
 
 			return wp_get_attachment_image_url( $theme_mod , $settings->size );
 
@@ -171,5 +226,3 @@ class bb_connector {
 		return $value;
 	}
 }
-
-bb_connector::init();

@@ -1,24 +1,70 @@
 <?php
 /**
- Plugin Name: Toolbox Customizer
- Plugin URI: https://www.beaverplugins.com/toolbox-customizer/
- Description: Create plugin based customizer styles for your themes and work
- Version: 1.6.5
- Author: BadabingBreda
- Text Domain: toolbox-customizer
- Domain Path: /languages
- Author URI: https://www.badabing.nl
+ * Toolbox Customizer
+ *
+ * @package     Toolbox Customizer
+ * @author      Badabingbreda
+ * @license     GPL-2.0+
+ *
+ * @wordpress-plugin
+ * Plugin Name: Toolbox Customizer
+ * Plugin URI:  https://www.badabing.nl
+ * Description: Create plugin based Customizer styles that work
+ * Version:     2.1.1
+ * Author:      Badabingbreda
+ * Author URI:  https://www.badabing.nl
+ * Text Domain: toolbox-customizer
+ * License:     GPL-2.0+
+ * License URI: http://www.gnu.org/licenses/gpl-2.0.txt
  */
 
-define( 'TOOLBOXCUSTOMIZER_VERSION'   , '1.6.5' );
-define( 'TOOLBOXCUSTOMIZER_DIR'     , plugin_dir_path( __FILE__ ) );
-define( 'TOOLBOXCUSTOMIZER_FILE'    , __FILE__ );
-define( 'TOOLBOXCUSTOMIZER_URL'     , plugins_url( '/', __FILE__ ) );
 
-include_once( 'toolbox-customizer-bblogic.php' );
+use ToolboxCustomizer\Autoloader;
+use ToolboxCustomizer\Init;
 
-require_once( 'inc/class-toolbox-customizer-css.php' );
 
-require_once( 'inc/class-customizer-connector.php' );
+ if ( defined( 'ABSPATH' ) && ! defined( 'TOOLBOXCUSTOMIZER_VERSION' ) ) {
+	register_activation_hook( __FILE__, 'TOOLBOXCUSTOMIZER_check_php_version' );
 
-require_once( 'inc/functions.customizer.php' );
+	/**
+	 * Display notice for old PHP version.
+	 */
+	function TOOLBOXCUSTOMIZER_check_php_version() {
+		if ( version_compare( phpversion(), '5.3', '<' ) ) {
+			die( esc_html__( 'Toolbox Customizer requires PHP version 5.3+. Please contact your host to upgrade.', 'toolbox-customizer' ) );
+		}
+	}
+
+    define( 'TOOLBOXCUSTOMIZER_VERSION' 	, '2.1.1' );
+    define( 'TOOLBOXCUSTOMIZER_DIR'		, plugin_dir_path( __FILE__ ) );
+    define( 'TOOLBOXCUSTOMIZER_FILE'	, __FILE__ );
+    define( 'TOOLBOXCUSTOMIZER_URL' 	, plugins_url( '/', __FILE__ ) );
+
+    define( 'CHECK_TOOLBOXCUSTOMIZER_PLUGIN_FILE', __FILE__ );
+
+}
+
+if ( ! class_exists( 'ToolboxCustomizer\Init' ) ) {
+
+	/**
+	 * The file where the Autoloader class is defined.
+	 */
+	require_once 'inc/Autoloader.php';
+
+    // load the class so other plugins can initialize it
+	require_once 'inc/CustomizerCss.php';
+
+	spl_autoload_register( array( new Autoloader(), 'autoload' ) );
+
+	new Init();
+
+}
+
+//include_once( 'toolbox-customizer-bblogic.php' );
+
+// require_once( 'inc/class-toolbox-customizer-css.php' );
+
+// require_once( 'inc/class-customizer-connector.php' );
+
+// require_once( 'inc/functions.customizer.php' );
+
