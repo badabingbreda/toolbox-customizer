@@ -23,6 +23,10 @@ with colors and units.
 
 == Changelog ==
 
+= 2.1.2 =
+
+Added a check for is_ssl() before enqueuing the css. When multisite the array returned using wp_upload_dir() request seems to be http, not https, resulting in a blocked cross-origin request.
+
 = 2.1.1 = 
 
 SCSS and debug enabled
