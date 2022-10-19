@@ -470,7 +470,7 @@ class CustomizerCss {
 	 */
 	public function enqueue_temp_css() {
 
-		wp_enqueue_style( $this->file_prefix , wp_upload_dir()['baseurl'] . '/' .$this->directory. '/' . $this->file_prefix . '_temp.css' , null, date( 'U' ) , 'all' );
+		wp_enqueue_style( $this->file_prefix , $this->secure_for_multisite(wp_upload_dir()['baseurl']) . '/' .$this->directory. '/' . $this->file_prefix . '_temp.css' , null, date( 'U' ) , 'all' );
 
 	}
 
@@ -484,13 +484,22 @@ class CustomizerCss {
 
 			$use_latest_version = filemtime( $this->final_css_path );
 
-			wp_enqueue_style( $this->file_prefix , wp_upload_dir()['baseurl'] . '/' . $this->directory . '/' . $this->file_prefix . '.css' , null, $use_latest_version , 'all' );
+			wp_enqueue_style( $this->file_prefix ,$this->secure_for_multisite( wp_upload_dir()['baseurl'] ) . '/' . $this->directory . '/' . $this->file_prefix . '.css' , null, $use_latest_version , 'all' );
 
 		} else {
 
-			wp_enqueue_style( $this->file_prefix , wp_upload_dir()['baseurl'] . '/' . $this->directory . '/' . $this->file_prefix . '.css' , null, $this->version, 'all' );
+			wp_enqueue_style( $this->file_prefix , $this->secure_for_multisite( wp_upload_dir()['baseurl'] ) . '/' . $this->directory . '/' . $this->file_prefix . '.css' , null, $this->version, 'all' );
 
 		}
+
+	}
+
+	public function secure_for_multisite( $baseurl )  {
+		if ( strpos( $baseurl , 'https' ) === 0 ) return $baseurl;
+
+		if ( is_ssl() ) $baseurl = str_replace( [ 'http://' ] , [ 'https://' ] , $baseurl );
+		
+		return $baseurl;
 
 	}
 	
