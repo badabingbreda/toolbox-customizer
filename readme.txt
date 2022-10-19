@@ -4,7 +4,7 @@ Plugin URI: https://www.beaverplugins.com/toolbox-customizer
 Contributors: BadabingBreda
 Tags: Plugins, Customizer, CSS
 Requires at least: 3.5
-Tested up to: 5.2.3
+Tested up to: 5.9.3
 Stable Tag: 1.0.1
 
 Compile static CSS from customizer settings instead of inline
