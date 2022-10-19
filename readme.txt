@@ -23,6 +23,10 @@ with colors and units.
 
 == Changelog ==
 
+= 2.1.1 =
+
+Remove Twig_Extension_Loader() from code
+
 = 1.6.5 =
 
 Fixed mistake in regex that matches hex-color

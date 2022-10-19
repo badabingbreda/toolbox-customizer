@@ -29,10 +29,6 @@ class Init {
      */
     public static function add_twig_filters( $twig ) {
 
-        /* this is where you can add your own functions to twig */
-        $twig->addExtension( new \Twig_Extension_StringLoader() );
-
-
         /**
          * Get a theme_mod value for use inside a twig template
         * @var [type]
