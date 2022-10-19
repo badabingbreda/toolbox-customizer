@@ -1,5 +1,6 @@
 {
     "require": {
-        "wikimedia/less.php": "~1.7.0.9"
+        "wikimedia/less.php": "^3.1",
+        "scssphp/scssphp": "^1.4"
     }
 }
