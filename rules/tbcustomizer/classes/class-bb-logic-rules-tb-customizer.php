@@ -27,7 +27,7 @@ final class BB_Logic_Rules_TB_Customizer {
 	 * @param object $rule
 	 * @return bool
 	 */
-	static public function evaluate_rule( $object_id = false, $rule ) {
+	static public function evaluate_rule( $object_id , $rule ) {
 
 		$value = get_theme_mod( $rule->theme_mod );
 

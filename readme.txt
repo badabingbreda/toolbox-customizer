@@ -23,6 +23,15 @@ with colors and units.
 
 == Changelog ==
 
+= 2.1.3 =
+
+Removed optional parameter before required in logic-rules because this triggers a notice in error logs
+Removed some commented out code
+
+= 2.1.2 =
+
+Merged with scss php
+
 = 2.1.1 =
 
 Remove Twig_Extension_Loader() from code
