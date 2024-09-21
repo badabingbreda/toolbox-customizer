@@ -10,7 +10,7 @@
  * Plugin Name: Toolbox Customizer
  * Plugin URI:  https://www.badabing.nl
  * Description: Create plugin based Customizer styles that work
- * Version:     2.1.3
+ * Version:     2.2.0
  * Author:      Badabingbreda
  * Author URI:  https://www.badabing.nl
  * Text Domain: toolbox-customizer
@@ -35,7 +35,7 @@ use ToolboxCustomizer\Init;
 		}
 	}
 
-    define( 'TOOLBOXCUSTOMIZER_VERSION' 	, '2.1.3' );
+    define( 'TOOLBOXCUSTOMIZER_VERSION' 	, '2.2.0' );
     define( 'TOOLBOXCUSTOMIZER_DIR'		, plugin_dir_path( __FILE__ ) );
     define( 'TOOLBOXCUSTOMIZER_FILE'	, __FILE__ );
     define( 'TOOLBOXCUSTOMIZER_URL' 	, plugins_url( '/', __FILE__ ) );
@@ -54,9 +54,13 @@ if ( ! class_exists( 'ToolboxCustomizer\Init' ) ) {
     // load the class so other plugins can initialize it
 	require_once 'inc/CustomizerCss.php';
 
+	require_once( 'badabing-updater.php' );
+
 	spl_autoload_register( array( new Autoloader(), 'autoload' ) );
 
 	new Init();
 
+	new Badabing\Updater( 'https://update.badabing.nl' , __FILE__ , '6cRa9j2RC8CaY7k' , 'toolbox-customizer-license' );
+ 
 }
 

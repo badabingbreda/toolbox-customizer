@@ -23,6 +23,10 @@ with colors and units.
 
 == Changelog ==
 
+= 2.2.0 +
+
+Updated plugin updater
+
 = 2.1.3 =
 
 Removed optional parameter before required in logic-rules because this triggers a notice in error logs
