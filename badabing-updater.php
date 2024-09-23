@@ -16,7 +16,7 @@ class Updater {
 	private $basename;
 	private $active;
 	private $updater_url;				// url to check for the updates
-	private $option_name = '';			// option name to store the license key
+	private $option_name = false;			// option name to store the license key
 	private $response_timeout = 2000;	// timeout in ms
 	private $product_id;				// gumroad product property
 	private $license_key = '';			// issued licensekey
@@ -36,8 +36,7 @@ class Updater {
 		// set the updater url, gumroad api url, gumroad timeout
 		$this->updater_url 		= $updater_url;
 		// where to get the license key from
-		if ( $option_name ) $this->option_name = $option_name;
-
+		if ( $option_name !== '' ) $this->option_name = $option_name;
 
 		$this->file 				= $file;
 		$this->product_id 			= $product_id;
@@ -94,7 +93,7 @@ class Updater {
 		endif;
 
 		// check if this is an active license
-		if ( $this->option_name !== '' && !$this->license_active ) add_action(  'in_plugin_update_message-'.$this->basename , array( $this , 'plugin_update_message' ) ,1, 2 );
+		if ( $this->option_name && !$this->license_active ) add_action(  'in_plugin_update_message-'.$this->basename , array( $this , 'plugin_update_message' ) ,1, 2 );
 		
 	}
 
@@ -117,30 +116,30 @@ class Updater {
 	 */
 	public function modify_transient( $transient ) {
 
-		if ( property_exists( $transient , 'checked' ) ) {
-			
-			if ( $checked = $transient->checked ) {
-				
-				if ( $this->get_updater_info() ) :
-
-					$slug = current( explode('/', $this->basename ) ); // Create valid slug
-
-					$plugin = array( // setup our plugin info
-						'url' 			=> $this->plugin["PluginURI"],
-						'slug' 			=> $slug,
-						'package' 		=> $this->updater_response['package'],
-						'new_version' 	=> $this->updater_response['new_version'],
-						'tested'		=> $this->updater_response['tested'],
-						'icons' 		=> isset($this->updater_response['icons']) ? $this->updater_response['icons'] : [],
-						'banners'		=> isset($this->updater_response['banners']) ? $this->updater_response['banners'] : [],
-						'banners_rtl'	=> [],
-	
-					);
-					$transient->response[$this->basename] = (object) $plugin; // Return it in response
-
-				endif;
-			}
+		if ( empty( $transient->checked) ) {
+			return $transient;
 		}
+
+		if ( $this->get_updater_info( ) ) :
+
+			$slug = current( explode('/', $this->basename ) ); // Create valid slug
+
+			$plugin = array( // setup our plugin info
+				'url' 			=> $this->plugin["PluginURI"],
+				'slug' 			=> $slug,
+				'package' 		=> $this->updater_response['package'],
+				'download_link'	=> $this->updater_response['package'],
+				'new_version' 	=> $this->updater_response['new_version'],
+				'tested'		=> $this->updater_response['tested'],
+				'icons' 		=> isset($this->updater_response['icons']) ? $this->updater_response['icons'] : [],
+				'banners'		=> isset($this->updater_response['banners']) ? $this->updater_response['banners'] : [],
+				'banners_rtl'	=> [],
+
+			);
+			$transient->response[$this->basename] = (object) $plugin; // Return it in response
+
+		endif;
+
 		return $transient;
 	}
 
@@ -150,7 +149,7 @@ class Updater {
 	 * @since 	1.0.0
 	 * @return 	boolean
 	 */
-	public function get_updater_info() {
+	public function get_updater_info( ) {
 
 		global $wp_version;
 
@@ -272,6 +271,7 @@ class Updater {
 						'Changelog'		=> $this->updater_response[ 'changelog' ],
 					),
 					'banners'			=> isset($this->updater_response['banners']) ? $this->updater_response['banners'] : [],
+					'package' 			=> $this->updater_response['package'],
 					'download_link'		=> $this->updater_response[ 'package' ],
 				);
 
@@ -294,7 +294,7 @@ class Updater {
 
 		// vars
 		$activate_message = sprintf(
-			__('To enable updates, you need to set an active license key.', 'badabing-updater'),
+			__('To enable updates for this plugin, you need to set an active license key.', 'badabing-updater'),
 		);
 
 		echo '<br><br><span style="display:block;background-color:red;color:white;padding:10px">' . $activate_message . '</span>';
