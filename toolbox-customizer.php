@@ -49,12 +49,12 @@ if ( ! class_exists( 'ToolboxCustomizer\Init' ) ) {
 	/**
 	 * The file where the Autoloader class is defined.
 	 */
-	require_once 'inc/Autoloader.php';
+	require_once TOOLBOXCUSTOMIZER_DIR . 'inc/Autoloader.php';
 
     // load the class so other plugins can initialize it
-	require_once 'inc/CustomizerCss.php';
+	require_once  TOOLBOXCUSTOMIZER_DIR. 'inc/CustomizerCss.php';
 
-	require_once( 'badabing-updater.php' );
+	require_once( TOOLBOXCUSTOMIZER_DIR. 'badabing-updater.php' );
 
 	spl_autoload_register( array( new Autoloader(), 'autoload' ) );
 

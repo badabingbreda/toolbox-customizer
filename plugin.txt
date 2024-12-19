@@ -1,0 +1,7 @@
+/** 
+PluginName: Toolbox Customizer
+ZipName: toolbox-customizer
+Description: Toolbox Customizer Plugin
+Version: 2.2.1
+Author: Badabing Breda
+AuthorURI: https://www.badabing.nl
